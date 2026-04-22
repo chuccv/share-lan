@@ -1,0 +1,15 @@
+[Unit]
+Description=share-lan HTTP file server (force download)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/share-lan.conf
+User=neil
+ExecStart=/usr/bin/share-lan
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

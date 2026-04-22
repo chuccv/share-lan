@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""share-lan: simple HTTP file server with force-download for LAN sharing."""
+import http.server
+import os
+import socketserver
+import sys
+
+CONFIG_FILE = "/etc/share-lan.conf"
+DEFAULTS = {"PORT": "8765", "DIRECTORY": "/home/neil/shared"}
+
+
+def load_config(path):
+    cfg = dict(DEFAULTS)
+    try:
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                cfg[k.strip()] = v.strip().strip('"').strip("'")
+    except FileNotFoundError:
+        pass
+    return cfg
+
+
+def make_handler(directory):
+    class DownloadHandler(http.server.SimpleHTTPRequestHandler):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, directory=directory, **kwargs)
+
+        def end_headers(self):
+            path = self.translate_path(self.path)
+            if os.path.isfile(path):
+                filename = os.path.basename(path)
+                self.send_header(
+                    "Content-Disposition", f'attachment; filename="{filename}"'
+                )
+            super().end_headers()
+
+    return DownloadHandler
+
+
+def main():
+    cfg = load_config(CONFIG_FILE)
+    port = int(cfg["PORT"])
+    directory = cfg["DIRECTORY"]
+
+    if not os.path.isdir(directory):
+        print(f"[share-lan] ERROR: directory does not exist: {directory}", file=sys.stderr)
+        sys.exit(1)
+
+    os.chdir(directory)
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
+    handler = make_handler(directory)
+    with socketserver.ThreadingTCPServer(("0.0.0.0", port), handler) as httpd:
+        print(f"[share-lan] serving {directory} on http://0.0.0.0:{port} (force-download)")
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            print("\n[share-lan] stopped")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,14 @@
+Package: share-lan
+Version: 1.0
+Section: net
+Priority: optional
+Architecture: all
+Depends: python3
+Maintainer: neil <nguyenthai95ai@gmail.com>
+Description: Simple LAN file share over HTTP with force-download
+ Serves a directory over HTTP on all network interfaces. All files
+ are served with Content-Disposition: attachment so clicking a link
+ triggers a download instead of opening in the browser.
+ .
+ Configuration: /etc/share-lan.conf
+ Service: systemctl {start,stop,status} share-lan
