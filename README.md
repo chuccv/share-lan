@@ -26,6 +26,20 @@ The service starts automatically. Check status:
 systemctl status share-lan
 ```
 
+Example output:
+
+```
+● share-lan.service - share-lan HTTP file server (force download)
+     Loaded: loaded (/usr/lib/systemd/system/share-lan.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2026-04-22 09:32:58 +07; 12min ago
+   Main PID: 78659 (python3)
+      Tasks: 1 (limit: 38214)
+     Memory: 9.3M (peak: 9.6M)
+        CPU: 90ms
+     CGroup: /system.slice/share-lan.service
+             └─78659 python3 /usr/bin/share-lan
+```
+
 ## Usage
 
 From any device on the LAN, open:
